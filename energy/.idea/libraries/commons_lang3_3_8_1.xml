@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="commons-lang3-3.8.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Documents/librerias/UCanAccess-5.0.0-bin/UCanAccess-5.0.0-bin/commons-lang3-3.8.1.jar!/" />
+      <root url="jar://$USER_HOME$/Documents/librerias/UCanAccess-5.0.0-bin/UCanAccess-5.0.0-bin/ucanaccess-5.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/Documents/librerias/UCanAccess-5.0.0-bin/UCanAccess-5.0.0-bin/jackcess-3.0.1.jar!/" />
+      <root url="jar://$USER_HOME$/Documents/librerias/UCanAccess-5.0.0-bin/UCanAccess-5.0.0-bin/hsqldb-2.5.0.jar!/" />
+      <root url="jar://$USER_HOME$/Documents/librerias/UCanAccess-5.0.0-bin/UCanAccess-5.0.0-bin/commons-logging-1.2.jar!/" />
+      <root url="file://$PROJECT_DIR$" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src" />
+    </SOURCES>
+  </library>
+</component>
