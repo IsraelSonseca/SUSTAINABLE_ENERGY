@@ -1,1 +1,2 @@
 https://medium.com/datos-y-ciencia/modelos-de-series-de-tiempo-en-python-f861a25b9677
+https://www.statsmodels.org/stable/examples/index.html
