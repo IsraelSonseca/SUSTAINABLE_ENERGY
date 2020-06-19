@@ -84,26 +84,27 @@ summary(potencias_data_ts)
 #### Descripcion grafica  ####
 # Comparacion de potencias trafico horaria 
 #(ver si hay diferencia entre diferentes horas)
-ggplot(potencias_data_ts, aes(x=hora, y=POTENCIA_TRAFO2)) + 
+ggplot(potencias_data_ts, aes(x=hora, y=POTENCIATRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias horarias del trafico del establecimient')+labs(x="Hora", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 
 
+
 # Comparacion de potencias trafico diaria
-ggplot(potencias_data_ts, aes(Fecha_hora, POTENCIA_TRAFO2))+geom_line(color="darkblue", size=1)+ggtitle('Potencias diarias del trafico del establecimiento')+labs(x="Fecha", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
+ggplot(potencias_data_ts, aes(Fecha_hora, POTENCIATRAFO2))+geom_line(color="darkblue", size=1)+ggtitle('Potencias diarias del trafico del establecimiento')+labs(x="Fecha", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 
 # Comparacion de potencias trafico de los dias semanal
-ggplot(potencias_data_ts, aes(x=dia_de_la_semana, y=POTENCIA_TRAFO2)) + 
+ggplot(potencias_data_ts, aes(x=dia_de_la_semana, y=POTENCIATRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias semanal del trafico del establecimiento')+labs(x="Dia de la semana", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 # Comparacion de potencia trafico entre dias_jornada y fines_semana
-ggplot(potencias_data_ts, aes(x=periodo_de_la_semana, y=POTENCIA_TRAFO2)) + 
+ggplot(potencias_data_ts, aes(x=periodo_de_la_semana, y=POTENCIATRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias entre semanal del trafico del establecimiento')+labs(x="Periodo de la semana", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 
 # Comparacion de potencias trafico mensual
-ggplot(potencias_data_ts, aes(x=mes, y=POTENCIA_TRAFO2)) + 
+ggplot(potencias_data_ts, aes(x=mes, y=POTENCIATRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias mensuales del trafico del establecimiento')+labs(x="Mes", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 
@@ -139,7 +140,7 @@ t <- proc.time() # Inicio del cronometro
 #- lags=> como se incrementa los valores 
 #- k=> 1 distancia
 #- msas=> estrategia MIMO o recursiva 
-tsfknn_pred_mimo <- knn_forecasting(train_data$POTENCIA_TRAFO, 
+tsfknn_pred_mimo <- knn_forecasting(train_data$POTENCIATRAFO2, 
                                     h = medidas_predecir, 
                                     lags = 1:medidas_predecir,   #predecir los futuros 96 medidas del dia  
                                     k = 1, 
