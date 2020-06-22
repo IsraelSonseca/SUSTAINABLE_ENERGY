@@ -13,7 +13,7 @@ public class testBBDD {
         } catch (SQLException throwables) {
         }
 
-        String sql = "SELECT * FROM EVENTOS";
+        String sql = "SELECT ACCESOS.HORA FROM ACCESOS";
         rs=controller.mandarSql(sql);
         while (rs.next()){
                 System.out.println(rs.getString(2));
