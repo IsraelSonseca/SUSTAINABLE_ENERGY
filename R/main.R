@@ -2,11 +2,15 @@
 library("caret")
 library("e1071")
 library("lubridate")
+
 library("dummies")
 library("imputeTS")
 library("ggplot2")
 library("forecast")
 library("frbs")
+
+
+
 library("tsfknn")
 # Carga del paquete "ARNN.R"
 libreria_arnn=file.choose()
@@ -52,6 +56,7 @@ potencias_data_ts$periodo_de_la_semana
 
 ## Dia de la semana
 potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???¡ì??a de la semana, dada una fecha
+
 potencias_data_ts$dia_de_la_semana
 
 ## Mes 
@@ -77,6 +82,7 @@ potencias_data_ts$hora <- as.factor(potencias_data_ts$hora)
 potencias_data_ts$anio <- as.factor(potencias_data_ts$anio)
 
 
+
 str(potencias_data_ts)
 head(potencias_data_ts)
 summary(potencias_data_ts)
@@ -86,6 +92,7 @@ summary(potencias_data_ts)
 #(ver si hay diferencia entre diferentes horas)
 ggplot(potencias_data_ts, aes(x=hora, y=POTENCIATRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias horarias del trafico del establecimient')+labs(x="Hora", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
+
 
 
 
@@ -117,12 +124,14 @@ anyNA(potencias_data_ts)
 summary(potencias_data_ts)
 ### Datos de train: ###
 # los datos anteriores desde fecha 2018-01-01 hasta 2018-04-04
-train_data<-filter(potencias_data_ts, Fecha_hora< as.Date("2018-04-05"))
+train_data<-filter(potencias_data_ts, Fecha_hora<= as.Date("2017-10-30"))
 summary(train_data)
+
+
 
 ### Datos de test:  ###
 #va a quedar los datos de ultimo dia para testing
-test_data <-filter(potencias_data_ts, Fecha_hora>=as.Date("2018-04-05"))
+test_data <-filter(potencias_data_ts, Fecha_hora>=as.Date("2017-10-31"))
 head(test_data,10)
 summary(test_data)
 length(test_data$Fecha_hora)
@@ -148,10 +157,13 @@ tsfknn_pred_mimo <- knn_forecasting(train_data$POTENCIATRAFO2,
 
 proc.time()-t # Detencion del cronometro
 
+
 # Evaluacion del modelo
 ro_mimo <- rolling_origin(tsfknn_pred_mimo, h = medidas_predecir)
 ro_mimo
 
+
+plot(tsfknn_pred_mimo)
 
 # Grafico de predicciones para el horizonte de pronostico
 plot(ro_mimo, h = medidas_predecir)
@@ -163,17 +175,19 @@ matriz_pronosticos_mimo
 
 # Calculo de rmse
 knn_mimo_pred=t(matriz_pronosticos_mimo[1,1:(ncol(matriz_pronosticos_mimo))]) #extrae primera fila de datos
-rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],knn_mimo_pred)
+rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],knn_mimo_pred)
 
 
 ### 1.2. Estrategia recursiva
 t <- proc.time() # Inicio del cronometro 
-tsfknn_pred_rec<- knn_forecasting(train_data$POTENCIA_TRAFO, 
+tsfknn_pred_rec<- knn_forecasting(train_data$POTENCIATRAFO2, 
                                     h = medidas_predecir, 
                                     lags = 1:medidas_predecir, 
                                     k = 1, 
                                     msas = "recursive")
 proc.time()-t # Detencion del cronometro
+
+plot(tsfknn_pred_rec)
 
 # Evaluacion del modelo
 ro_rec<- rolling_origin(tsfknn_pred_rec, h = medidas_predecir)
@@ -190,7 +204,7 @@ write.csv(matriz_pronosticos_rec, "out_of_sample_tsfknn_rec_prediction.csv")
 
 # Calculo de rmse (MIMO mejor que recursiva)
 knn_rec_pred=t(matriz_pronosticos_rec[1,1:(ncol(matriz_pronosticos_rec))]) #extrae primera fila de datos
-rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],knn_rec_pred)
+rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],knn_rec_pred)
 
 
 ######################################################################################
@@ -200,9 +214,9 @@ rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],knn_rec_pred)
 # Bucle que guarda grupos de 96 datos en vectores
 # Cada vector contiene 96 observaciones (frecuencia diaria) + 1 variable objetivo
 data_vectors<- list()
-n <- length(potencias_data_ts$POTENCIA_TRAFO)-(medidas_predecir)
+n <- length(potencias_data_ts$POTENCIATRAFO2)-(medidas_predecir)
 for(i in 1:n){
-  data_vector <- list(potencias_data_ts$POTENCIA_TRAFO[i:(i+medidas_predecir)])
+  data_vector <- list(potencias_data_ts$POTENCIATRAFO2[i:(i+medidas_predecir)])
   data_vectors <- c(data_vectors, data_vector)
 }
 
@@ -210,6 +224,8 @@ for(i in 1:n){
 # Creacion de un dataframe con tantas filas como vectores se han creado y 97 columnas
 # La ultima columna contiene los valores de la variable objetivo
 frbs_data <- as.data.frame(t(as.data.frame(data_vectors)))
+
+
 
 rownames(frbs_data)<-NULL
 
@@ -248,6 +264,7 @@ summary(frbs_fit_denfis)
 # Prediccion de valores para la particion de test dentro de muestra
 frbs_test_data_without_target<- frbs_test_data[,-ncol(frbs_test_data)]
 frbs_test_pred_denfis<- predict(frbs_fit_denfis, newdata = frbs_test_data_without_target)
+
 
 
 # Calculo de RMSE dentro de muestra
@@ -322,7 +339,7 @@ t <- proc.time() # Inicio del cronometro
 #     aicc: criterio de informacion Akaike corregido para tamanyos de muestra finitos
 #     bic: criterio de informacion bayesiano
 # test=> Tipo de prueba de raiz unitaria
-fit_auto_arima <- auto.arima(train_data$POTENCIA_TRAFO, 
+fit_auto_arima <- auto.arima(train_data$POTENCIATRAFO2, 
                              d = NA, 
                              D = NA, 
                              stationary = FALSE,
@@ -440,11 +457,11 @@ lines(predictions_means,col="red")
 #### Numerico/Calculo de errores de cada metodo
 c_modelo=c("knn","frbs","autoarima","arnn","combinatorio")
 ### RMSE => raiz de error cuadrado medio
-v01=rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],knn_mimo_pred)
-v02=rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],frbs_hyfis_pred)
-v03=rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],auto_arima_pred)
-v04=rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],arnn_pred)
-v05=rmse(test_data$POTENCIA_TRAFO[0:medidas_predecir],predictions_means)
+v01=rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],knn_mimo_pred)
+v02=rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],frbs_hyfis_pred)
+v03=rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],auto_arima_pred)
+v04=rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],arnn_pred)
+v05=rmse(test_data$POTENCIATRAFO2[0:medidas_predecir],predictions_means)
 c_rmse=c(v01,v02,v03,v04,v05)
 
 
@@ -454,11 +471,11 @@ resultado_rmse
 
 #--------
 ### MAPE => error medio de porcentaje absoluto
-v21=mape(test_data$POTENCIA_TRAFO[0:medidas_predecir],knn_mimo_pred)
-v22=mape(test_data$POTENCIA_TRAFO[0:medidas_predecir],frbs_hyfis_pred)
-v23=mape(test_data$POTENCIA_TRAFO[0:medidas_predecir],auto_arima_pred)
-v24=mape(test_data$POTENCIA_TRAFO[0:medidas_predecir],arnn_pred)
-v25=mape(test_data$POTENCIA_TRAFO[0:medidas_predecir],predictions_means)
+v21=mape(test_data$POTENCIATRAFO2[0:medidas_predecir],knn_mimo_pred)
+v22=mape(test_data$POTENCIATRAFO2[0:medidas_predecir],frbs_hyfis_pred)
+v23=mape(test_data$POTENCIATRAFO2[0:medidas_predecir],auto_arima_pred)
+v24=mape(test_data$POTENCIATRAFO2[0:medidas_predecir],arnn_pred)
+v25=mape(test_data$POTENCIATRAFO2[0:medidas_predecir],predictions_means)
 c_mape=c(v21,v22,v23,v24,v25)
 
 # Crea dataframe para mostrar un resumen de resultados 
@@ -469,14 +486,14 @@ resultado_mape
 #### Grafico 
 # Potencias del trafico
 par(mfrow=c(1,5))
-plot(test_data$POTENCIA_TRAFO[0:medidas_predecir],type="l", col="black",main="Knn")
+plot(test_data$POTENCIATRAFO2[0:medidas_predecir],type="l", col="black",main="Knn")
 lines(knn_mimo_pred,col="red")
-plot(test_data$POTENCIA_TRAFO[0:medidas_predecir],type="l", col="black",main="Hyfis FRBS")
+plot(test_data$POTENCIATRAFO2[0:medidas_predecir],type="l", col="black",main="Hyfis FRBS")
 lines(frbs_hyfis_pred,col="red")
-plot(test_data$POTENCIA_TRAFO[0:medidas_predecir],type="l", col="black",main="Autoarima")
+plot(test_data$POTENCIATRAFO2[0:medidas_predecir],type="l", col="black",main="Autoarima")
 lines(auto_arima_pred,col="red")
-plot(test_data$POTENCIA_TRAFO[0:medidas_predecir],type="l", col="black",main="Arnn")
+plot(test_data$POTENCIATRAFO2[0:medidas_predecir],type="l", col="black",main="Arnn")
 lines(arnn_pred,col="red")
-plot(test_data$POTENCIA_TRAFO[0:medidas_predecir],type="l", col="black",main="Combinatorio")
+plot(test_data$POTENCIATRAFO2[0:medidas_predecir],type="l", col="black",main="Combinatorio")
 lines(predictions_means,col="red")
 
