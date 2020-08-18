@@ -177,7 +177,10 @@ ui <- fluidPage(
       h3(textOutput("caption")),
       
       # Output: Plot of the requested variable against mpg ----
-      plotOutput("mpgPlot")
+      plotOutput("mpgPlot"),
+      
+      downloadButton(outputId = "Cat10", label = "Download The Plot")
+      
       
     )
   )
@@ -206,6 +209,23 @@ server <- function(input, output) {
             outline = input$outliers,
             col = "#75AADB", pch = 19)
   })
+  
+  output$Cat10<- downloadHandler(
+    #Specify The File Name 
+    filename = function() {
+      paste("plot","png",sep= ".")},
+    content = function(file){
+      # open the format of file which needs to be downloaded ex: pdf, png etc. 
+        png(file)
+
+      boxplot(as.formula(formulaText()),
+              data = potencias_data_ts,
+              outline = input$outliers,
+              col = "#75AADB", pch = 19)
+      
+      dev.off()
+    }
+  )
   
 }
 
