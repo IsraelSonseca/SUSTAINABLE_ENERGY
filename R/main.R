@@ -28,7 +28,7 @@ library(tidyverse)
 # Funcion para mapear cada fecha con su correspondiente periodo de la semana
 # Asigna categoria "dia_entre_semana" o "fin_de_semana" a cada fecha
 extrae_dia_semana <- function(x) {
-  val <- weekdays(x) # Funcion que extrae el d???¡ì??as de la semana, dada una fecha
+  val <- weekdays(x) # Funcion que extrae el d???????as de la semana, dada una fecha
   if (grepl("s?bado", val, perl=TRUE) | val == "domingo") { 
     val2 = "fin_de_semana"
   }
@@ -45,17 +45,19 @@ extrae_dia_semana <- function(x) {
 f <- file.choose() #elegir el fichero "ptenciageneradora.xlsx"
 potencias_data <- read_excel(f)
 
+potencias_data$Fecha_hora <-as.POSIXct(potencias_data$Fecha_hora)
+
 potencias_data_ts=as.data.frame(potencias_data)
 
 
 ##-----conversion de datos---------------------
 # Se aniaden las siguientes variables por considerarse relevantes a la hora de explicar la demanda
-## Periodo de la semana (d???¡ì??a entre semana o fin de semana)
+## Periodo de la semana (d???????a entre semana o fin de semana)
 potencias_data_ts$periodo_de_la_semana <- unlist(lapply(potencias_data_ts$Fecha_hora, extrae_dia_semana))
 potencias_data_ts$periodo_de_la_semana
 
 ## Dia de la semana
-potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???¡ì??a de la semana, dada una fecha
+potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???????a de la semana, dada una fecha
 
 potencias_data_ts$dia_de_la_semana
 
@@ -86,11 +88,12 @@ potencias_data_ts$anio <- as.factor(potencias_data_ts$anio)
 str(potencias_data_ts)
 head(potencias_data_ts)
 summary(potencias_data_ts)
+plot(potencias_data_ts$POTENCIA_TRAFO2)
 
 #### Descripcion grafica  ####
 # Comparacion de potencias trafico horaria 
 #(ver si hay diferencia entre diferentes horas)
-ggplot(potencias_data_ts, aes(x=hora, y=POTENCIATRAFO2)) + 
+ggplot(potencias_data_ts, aes(x=hora, y=POTENCIA_TRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias horarias del trafico del establecimient')+labs(x="Hora", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 
@@ -98,7 +101,7 @@ ggplot(potencias_data_ts, aes(x=hora, y=POTENCIATRAFO2)) +
 
 
 # Comparacion de potencias trafico diaria
-ggplot(potencias_data_ts, aes(Fecha_hora, POTENCIATRAFO2))+geom_line(color="darkblue", size=1)+ggtitle('Potencias diarias del trafico del establecimiento')+labs(x="Fecha", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
+ggplot(potencias_data_ts, aes(Fecha_hora, POTENCIA_TRAFO2))+geom_line(color="darkblue", size=1)+ggtitle('Potencias diarias del trafico del establecimiento')+labs(x="Fecha", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
 
 # Comparacion de potencias trafico de los dias semanal

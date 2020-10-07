@@ -14,7 +14,7 @@ library("ggthemes")
 # Funcion para mapear cada fecha con su correspondiente periodo de la semana
 # Asigna categoria "dia_entre_semana" o "fin_de_semana" a cada fecha
 extrae_dia_semana <- function(x) {
-  val <- weekdays(x) # Funcion que extrae el d???¡ì??as de la semana, dada una fecha
+  val <- weekdays(x) # Funcion que extrae el d???????as de la semana, dada una fecha
   if (grepl("s?bado", val, perl=TRUE) | val == "domingo") { 
     val2 = "fin_de_semana"
   }
@@ -36,12 +36,12 @@ potencias_data_ts=as.data.frame(potencias_data)
 
 ##-----conversion de datos---------------------
 # Se aniaden las siguientes variables por considerarse relevantes a la hora de explicar la demanda
-## Periodo de la semana (d???¡ì??a entre semana o fin de semana)
+## Periodo de la semana (d???????a entre semana o fin de semana)
 potencias_data_ts$periodo_de_la_semana <- unlist(lapply(potencias_data_ts$Fecha_hora, extrae_dia_semana))
 potencias_data_ts$periodo_de_la_semana
 
 ## Dia de la semana
-potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???¡ì??a de la semana, dada una fecha
+potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???????a de la semana, dada una fecha
 
 potencias_data_ts$dia_de_la_semana
 
@@ -66,6 +66,8 @@ potencias_data_ts$periodo_de_la_semana <- as.factor(potencias_data_ts$periodo_de
 potencias_data_ts$mes <- as.factor(potencias_data_ts$mes)
 potencias_data_ts$hora <- as.factor(potencias_data_ts$hora)
 potencias_data_ts$anio <- as.factor(potencias_data_ts$anio)
+
+
 
 
 
@@ -150,9 +152,6 @@ mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 # Define UI for miles per gallon app ----
 ui <- fluidPage(
   
-  # App title ----
-  titlePanel("Miles Per Gallon"),
-  
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
     
@@ -160,7 +159,7 @@ ui <- fluidPage(
     sidebarPanel(
       
       # Input: Selector for variable to plot against mpg ----
-      selectInput("variable", "Variable:",
+      selectInput("periodo", "Periodo:",
                   c("Hora" = "hora",
                     "Mes" = "mes",
                     "Anio" = "anio")),
@@ -193,7 +192,7 @@ server <- function(input, output) {
   # This is in a reactive expression since it is shared by the
   #output$caption and output$mpgPlot functions
   formulaText <- reactive({
-    paste("POTENCIATRAFO2 ~", input$variable)
+    paste("POTENCIATRAFO2 ~", input$periodo)
   })
   
   # Return the formula text for printing as a caption ----

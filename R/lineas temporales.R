@@ -1,7 +1,16 @@
+
+
+
+
+
+
+
 library(readxl)
 library("lubridate")
 library("ggplot2")
 library("ggthemes")
+library("xts")
+library("dygraphs")
 
 
 
@@ -14,7 +23,7 @@ library("ggthemes")
 # Funcion para mapear cada fecha con su correspondiente periodo de la semana
 # Asigna categoria "dia_entre_semana" o "fin_de_semana" a cada fecha
 extrae_dia_semana <- function(x) {
-  val <- weekdays(x) # Funcion que extrae el d???¡ì??as de la semana, dada una fecha
+  val <- weekdays(x) # Funcion que extrae el d???????as de la semana, dada una fecha
   if (grepl("s?bado", val, perl=TRUE) | val == "domingo") { 
     val2 = "fin_de_semana"
   }
@@ -31,18 +40,20 @@ extrae_dia_semana <- function(x) {
 f <- file.choose() #elegir el fichero "ptenciageneradora.xlsx"
 potencias_data <- read_excel(f)
 
+summary(potencias_data)
+
 potencias_data_ts=as.data.frame(potencias_data)
 
 
 ##-----conversion de datos---------------------
 # Se aniaden las siguientes variables por considerarse relevantes a la hora de explicar la demanda
-## Periodo de la semana (d???¡ì??a entre semana o fin de semana)
+## Periodo de la semana (d???????a entre semana o fin de semana)
 potencias_data_ts$periodo_de_la_semana <- unlist(lapply(potencias_data_ts$Fecha_hora, extrae_dia_semana))
 
 potencias_data_ts$periodo_de_la_semana
 
 ## Dia de la semana
-potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???¡ì??a de la semana, dada una fecha
+potencias_data_ts$dia_de_la_semana <-weekdays(potencias_data_ts$Fecha_hora) # extrae el d???????a de la semana, dada una fecha
 
 potencias_data_ts$dia_de_la_semana
 
@@ -85,6 +96,31 @@ fig
 
 
 
+
+
+
+opciones <-colnames(potencias_data)
+
+choice<-list()
+cont<-0
+for(i in 2:length(opciones)) {
+  cont<-cont+1
+  print (i)
+  newChoice<-list(as.character(cont))
+  names(newChoice) <- c(opciones[i])
+  choice <-append(choice,newChoice)
+}
+
+xts_1 <- xts(potencias_data_ts$POTENCIA_TRAFO2,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
+xts_2 <- xts(potencias_data_ts$POTENCIA_TRAFO3,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
+xts_3 <- xts(potencias_data_ts$POTENCIA_TRAFO4,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
+xts_4 <- xts(potencias_data_ts$POTENCIA_TRAFO5,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
+
+xtss<-append(xts_1,xts_2,xts_3,xts_4)
+
+
+
+
 library(shiny)
 
 # Define UI for app that draws a histogram ----
@@ -104,7 +140,11 @@ ui <- fluidPage(
                   label = "Number of bins:",
                   min = 1,
                   max = 50,
-                  value = 30)
+                  value = 30),
+      checkboxGroupInput("checkGroup", 
+                         h3("Checkbox group"), 
+                         choices = choice,
+                         selected = 1:2)
       
     ),
     
@@ -114,12 +154,12 @@ ui <- fluidPage(
       # Output: Histogram ----
       #plotlyOutput(outputId = "distPlot")
       
+      
       dygraphOutput(outputId = "dygraph")
       
     )
   )
 )
-
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
   
@@ -132,8 +172,18 @@ server <- function(input, output) {
   #    re-executed when inputs (input$bins) change
   # 2. Its output type is a plot
   output$dygraph <- renderDygraph({
-    trafo2_xts <- xts(potencias_data_ts$POTENCIATRAFO2,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
-    dygraph(trafo2_xts) %>% dyRangeSelector()
+    #mostrar<-as.xts(mi_entorno[["1"]])
+    #i<-"1"
+    #grafico<-dygraph(mi_entorno[[i]])
+    #dySeriesData(grafico,"w",mi_entorno[["2"]])
+    bind<-xts_1
+    for ( i in input$checkGroup) {
+      #dySeriesData(grafico,"w",mi_entorno[[i]])
+      bind<-cbind(bind,mi_entorno[[i]])
+    }
+    dygraph(bind) %>% dyRangeSelector()
+    #potenciasseries <-cbind(seq(xts[list(input$checkGroup)]))
+    #dygraph(potenciasseries) %>% dyRangeSelector()
     #x    <- potencias_data_ts$Fecha_hora
     #bins <- potencias_data_ts$POTENCIATRAFO2
     
@@ -161,4 +211,79 @@ plot_ly(lungDeaths)
 
 trafo2_xts <- xts(potencias_data_ts$POTENCIATRAFO2,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
 dygraph(trafo2_xts) %>% dyRangeSelector()
+
+choiceeees = list("Choice 1" = 1, 
+               "Choice 2" = 2, 
+               "Choice 3" = 3)
+
+
+x <- c(1,2,3,4)
+lista<-list()
+
+
+
+checkboxGroupInput("checkGroup", 
+                   h3("Seleccione las potencias a visualizar"), 
+                   choices = list("Choice 1" = 1, 
+                                  "Choice 2" = 2, 
+                                  "Choice 3" = 3),
+                   selected = 1)
+
+
+
+
+
+trafo2_xts <- xts(potencias_data_ts$POTENCIATRAFO2,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
+trafo3_xts <- xts(potencias_data_ts$POTENCIA_TRAFO3,order.by=potencias_data_ts$Fecha_hora,frequency = 35036)
+potenciasseries <-cbind(xts(xtss[1]),xts(xtss[2]))
+
+
+
+choice1 <- list("Choice 1" = 1, 
+               "Choice 2" = 2, 
+               "Choice 3" = 3)
+choice2 <-list("asdfa"=4)
+choices <- append(choice1,choice2)
+
+opciones <-colnames(potencias_data)
+
+choice<-list()
+
+for(i in opciones) {
+  name <- str(i)
+  newChoice<-list(name = 1)
+  choice <-append(choice,newChoice)
+}
+
+
+
+mi_entorno = new.env()
+
+
+mi_entorno[[ "1" ]] = xts_1
+mi_entorno[[ "2" ]] = xts_2
+mi_entorno[[ "3" ]] = xts_3
+mi_entorno[[ "4" ]] = xts_4
+
+
+mi_entorno = new.env()
+
+for (i in 1:4) {
+  mi_entorno[[ as.character(i) ]] = paste(xts_,as.character(i))
+}
+mi_entorno[[ "1" ]] = xts_1
+mi_entorno[[ "2" ]] = xts_2
+mi_entorno[[ "3" ]] = xts_3
+mi_entorno[[ "4" ]] = xts_4
+
+
+
+mi_entorno[[ "1" ]]
+
+
+aprueba<-mi_entorno[[ "1" ]]
+
+
+
+dygraph(mi_entorno[["1"]])
 
