@@ -195,7 +195,9 @@ server <- function(input, output) {
   
 }
 
-# Create Shiny app ----
+# Create Shiny app ---
+-
+
 shinyApp(ui = ui, server = server)
 library(dygraphs)
 lungDeaths <- cbind(mdeaths, fdeaths)
@@ -269,7 +271,7 @@ mi_entorno[[ "4" ]] = xts_4
 mi_entorno = new.env()
 
 for (i in 1:4) {
-  mi_entorno[[ as.character(i) ]] = paste(xts_,as.character(i))
+  mi_entorno[[ as.character(i) ]] = as.formula(paste(xts_,as.character(i)))
 }
 mi_entorno[[ "1" ]] = xts_1
 mi_entorno[[ "2" ]] = xts_2

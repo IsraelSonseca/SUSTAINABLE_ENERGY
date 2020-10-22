@@ -13,6 +13,7 @@ server <- function(input, output) {
   
   # Generate a summary of the dataset ----
   output$PRUEBA <- renderPlot({
+    browse()
     plot(potencias_data_ts[,selectColumnServer("selecGlob")])
 
   })
@@ -52,9 +53,19 @@ server <- function(input, output) {
   
   
   
+  prediccc<-reactive(knn_mimo[[selectColumnServer("selecPred")]])
   
+  observeEvent(selectColumnServer("selecPred"),{
+    value<-knnServer("knnUI",datos=prediccc(),dia=input$slider,semana=input$week,fechas=knn_mimo[["marcatemporal"]])
+  })
+  
+  observeEvent(input$slider,{
+    value<-knnServer("knnUI",datos=prediccc(),dia=input$slider,semana=input$week,fechas=knn_mimo[["marcatemporal"]])
+  })
 
-  
+  output$dygraph <- renderDygraph({
+    dygraph(potencias_data_ts_xts$POTENCIA_TRAFO2, main = "Predicted Deaths/Month")
+  })
   #output$temperatura <- renderDygraph({
   #  dygraph(xts$TEMPERATURA)
   #})

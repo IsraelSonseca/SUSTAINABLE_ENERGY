@@ -2,7 +2,7 @@ server <- function(input, output) {
   datafile <- uploadServer("datafile", stringsAsFactors = FALSE)
   
   potencias_data <- reactive({
-    potencias_data<-read_excel(input$file1$datapath)
+    #potencias_data<-read_excel(input$file1$datapath)
     potencias_data
     })
   
@@ -10,8 +10,8 @@ server <- function(input, output) {
   
   # Generate a summary of the dataset ----
   output$summary <- renderPrint({
-    req(input$file1)
-    summary(potencias_data())
+    #req(input$file1)
+    summary(potencias_data_ts)
   })
   
   

@@ -76,6 +76,8 @@ unique(potencias_data_ts$anio)
 
 # Establecimiento del tipo de las columnas como "factor" que serviran para mostrar en grafico
 potencias_data_ts$dia_de_la_semana <-as.factor(potencias_data_ts$dia_de_la_semana)
+
+
 potencias_data_ts$periodo_de_la_semana <- as.factor(potencias_data_ts$periodo_de_la_semana)
 potencias_data_ts$mes <- as.factor(potencias_data_ts$mes)
 potencias_data_ts$hora <- as.factor(potencias_data_ts$hora)
@@ -89,6 +91,11 @@ summary(potencias_data_ts)
 #### Descripcion grafica  ####
 # Comparacion de potencias trafico horaria 
 #(ver si hay diferencia entre diferentes horas)
+ggplot(potencias_data_ts, aes(x=hora,y=POTENCIA_TRAFO2))+geom_col()
+
+
+
+
 ggplot(potencias_data_ts, aes(x=hora, y=POTENCIA_TRAFO2)) + 
   geom_boxplot() + ggtitle('Potencias horarias del trafico del establecimient')+labs(x="Hora", y="Potencia")+ theme(plot.title = element_text(hjust=0.5))
 
@@ -121,12 +128,12 @@ anyNA(potencias_data_ts)
 summary(potencias_data_ts)
 ### Datos de train: ###
 # los datos anteriores desde fecha 2018-01-01 hasta 2018-04-04
-train_data<-filter(potencias_data_ts, Fecha_hora< as.Date("2017-12-30"))
+train_data<-filter(potencias_data_ts, Fecha_hora< as.Date("2018-01-01"))
 summary(train_data)
 
 ### Datos de test:  ###
 #va a quedar los datos de ultimo dia para testing
-test_data <-filter(potencias_data_ts, Fecha_hora>=as.Date("2017-12-30"))
+test_data <-filter(potencias_data_ts, Fecha_hora>=as.Date("2018-01-01"))
 head(test_data,10)
 summary(test_data)
 length(test_data$Fecha_hora)
@@ -137,6 +144,39 @@ summary(test_data)
 ###########################################################################################
 ##### METODO 1. FORECASTING DE SERIES TEMPORALES CON METODO K-NEAREST NEIGHBOR (LIBRERIA TFSKNN)
 ###########################################################################################
+
+
+library(tsfknn)
+pred <- knn_forecasting(train_data$POTENCIA_TRAFO2, h = medidas_predecir, k = 3)
+pred$prediction # To see a time series with the forecasts
+plot(pred) # To see a plot with the forecast
+library(ggplot2)
+autoplot(pred, highlight = "neighbors")  # To see the nearest neighbors
+
+knn_mimo = new.env()
+for (i in 2:5) {
+  pred <- knn_forecasting(train_data[,i], h = medidas_predecir, k = 3)
+  knn_mimo[[as.character(i)]]=pred
+}
+plot(knn_mimo[["5"]])
+pred <- knn_forecasting(train_data[,2], h = medidas_predecir, k = 3)
+knn_mimo[["POTENCIA_TRAFO2"]]=pred
+pred = knn_forecasting(train_data[,3], h = medidas_predecir, k = 3)
+knn_mimo[["POTENCIA_TRAFO3"]]=pred
+pred = knn_forecasting(train_data[,4], h = medidas_predecir, k = 3)
+knn_mimo[["POTENCIA_TRAFO4"]]=pred
+pred = knn_forecasting(train_data[,5], h = medidas_predecir, k = 3)
+knn_mimo[["POTENCIA_TRAFO5"]]=pred
+knn_mimo[["marcatemporal"]]=data.frame(test_data$hora,test_data$Fecha_hora)
+
+
+dia<-2
+pruebbaaaaaa<-data.frame(knn_mimo[["POTENCIA_TRAFO2"]]$prediction,knn_mimo[["marcatemporal"]])
+(((dia-1)*96)+1)
+(dia*96)
+bueno<-pruebbaaaaaa[(((dia-1)*96)+1):(dia*96),]
+colnames(bueno)<-c("prediction","hora","fecha")
+ggplot(bueno,aes(hora,prediction))+geom_col()
 
 ### 1.1. Estrategia MIMO
 t <- proc.time() # Inicio del cronometro 
@@ -247,6 +287,8 @@ t <- proc.time() # Inicio del cronometro
 frbs_fit_denfis<- frbs.learn(frbs_train_data, NULL, method.type = "DENFIS", control = denfis_ctrl)
 proc.time()-t # Detencion del cronometro
 
+plotMF(frbs_fit_denfis)
+
 # Resumen de caracteriasticas del modelo entrenado
 summary(frbs_fit_denfis)
 
@@ -354,6 +396,8 @@ plot(pronostico,
      main = "Forecasts from ARIMA(1,1,3) para Potencias trafico",
      ylab = "grado"
 )
+
+
 
 
 # Guardar resultado de prediccion

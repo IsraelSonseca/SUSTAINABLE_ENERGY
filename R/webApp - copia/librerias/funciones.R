@@ -10,3 +10,11 @@ extrae_dia_semana <- function(x) {
   }
   return(val2)
 }
+
+
+
+substrRight <- function(x, n){ 
+  substr(x, nchar(x)-n+1, nchar(x)) 
+} 
+
+

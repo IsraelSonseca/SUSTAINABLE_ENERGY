@@ -10,8 +10,9 @@ boxplotUI <- function(id, label = "boxplots"){
                        c("Hora" = "hora",
                          "Mes" = "mes",
                          "Anio" = "anio",
-                         "Periodo" = "periodo_de_la_semana",
-                         "Dia"="dia_de_la_semana")),
+                         "Dia"="dia_de_la_semana",
+                         "Evento" = "Evento",
+                         "Periodo" = "periodo_de_la_semana")),
            
 
           

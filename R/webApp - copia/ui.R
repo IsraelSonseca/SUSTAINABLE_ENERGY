@@ -4,10 +4,11 @@ header <- dashboardHeader(
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Datos", tabName = "entry", icon = icon("table")),
-    menuItem("SeriesTemporales", icon = icon("chart-area"), tabName = "tempser"),
-    menuItem("Diagramas de caja", icon = icon("box"), tabName = "boxplots",
-             badgeLabel = "new", badgeColor = "green")
+    menuItem("Data", tabName = "entry", icon = icon("table")),
+    menuItem("Time Series", icon = icon("chart-area"), tabName = "tempser"),
+    menuItem("Boxplots", icon = icon("box"), tabName = "boxplots"),
+    menuItem("Predictions", icon = icon("arrow-alt-circle-right"), tabName = "predictions",
+             badgeLabel = "new", badgeColor = "blue")
   )
 )
 
@@ -47,7 +48,8 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "tempser",
-            h2("Widgets tab content")
+            h2("Widgets tab content"),
+            dygraphOutput("dygraph")
     ),
     tabItem(tabName = "boxplots",
             h2("Widgets tab content"),
@@ -57,6 +59,31 @@ body <- dashboardBody(
                   boxplotUI("asd")
                 )
             )
+    ),
+    
+    tabItem(tabName = "predictions",width=12,
+            h2("Widgets tab content"),
+            
+            box(width = 3,
+              title = "Inputs", background = "black",
+              "Box content here", br(), "More box content",
+              selectColumnUI("selecPred"),
+              sliderInput("slider", "Slider input: (DAY)", 1, 100, 50),
+              checkboxInput("week", "Week View:")
+            ),
+            
+            # Output: Tabset w/ plot, summary, and table ----
+            tabBox(type = "tabs",width=9,
+                        tabPanel("knn_MIMO",
+                                 knnUI("knnUI")
+                                 ),
+                        tabPanel("knn_RECURSIVE"),
+                        tabPanel("frbs_DENFIS"),
+                        tabPanel("frbs_HYFIS"),
+                        tabPanel("auto_ARIMA"),
+                        tabPanel("ARNN"),
+                        tabPanel("Combination")
+                        )
     )
   )
 )
